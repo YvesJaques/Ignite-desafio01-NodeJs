@@ -15,10 +15,22 @@ function userExists(username, users) {
   return users.some(user => user.username === username);
 }
 
+//Middleware verifica existencia usuario
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  //desestruturação do username
+  const { username } = request.headers;
+
+  //busca do username
+  const user = users.find(user => user.username === username); 
+    
+  if(!user) return response.status(400).json({ error: "User not found"});
+  
+  request.user = user;
+
+  return next();
 }
 
+//cadastro de usuario
 app.post('/users', (request, response) => {
   const { username, name } = request.body;  
 
@@ -39,8 +51,12 @@ app.post('/users', (request, response) => {
   return response.status(201).send();
 });
 
+//listagem de todos do user
 app.get('/todos', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  //desestruturação do user
+  const { user } = request;
+
+  return response.json(user.todos);
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
