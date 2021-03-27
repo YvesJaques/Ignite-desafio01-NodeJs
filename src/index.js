@@ -62,16 +62,18 @@ app.post('/users', (request, response) => {
       return response.status(400).json({ error: "User already exists!" });
   }   
 
-  //inserção do usuario
-  users.push({ 
-    username, 
+  const user = {
+    id: uuidv4(),
     name,
-    id: uuidv4,
+    username, 
     todos: []
-  })
+  }
+
+  //inserção do usuario
+  users.push(user)
 
   //resposta de sucesso
-  return response.status(201).send();
+  return response.status(201).send(user);
 });
 
 //listagem de todos do user
@@ -89,7 +91,7 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
     const { user } = request;   
     
     const todo = { 
-      id: uuidv4,
+      id: uuidv4(),
       title,
       done: false, 
       deadline: new Date(deadline), 
