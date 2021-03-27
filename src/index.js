@@ -40,15 +40,13 @@ function checksExistsTodo(request, response, next) {
   const user = users.find(user => user.username === username);   
 
   //busca do todo
-  const todo = user.todos[request.params.id];
-
+  const todo = user.todos.find(todo => todo.id === request.params.id);
+  
   //verificacao de existencia do todo
   if(!todo) return response.status(400).json({ error: "Todo not found!"});  
   
   //na utilização de mais de um middlware é necessário especificar o retorno da request
-  request.todo = todo;
-  //endereço do todo para evitar busca repetida em operacoes subsequentes
-  request.indexOfTodo = request.params.id; 
+  request.todo = todo;  
 
   return next();
 }
@@ -140,7 +138,7 @@ app.delete('/todos/:id', checksExistsUserAccount, checksExistsTodo, (request, re
 
   const todo = request.todo;
 
-  user.todos.splice(request.indexOfTodo, 1);
+  user.todos.splice(user.todos.indexOf(todo), 1);
 
   return response.status(200).json(user.todos);
 });
