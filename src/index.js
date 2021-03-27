@@ -79,7 +79,7 @@ app.get('/todos', checksExistsUserAccount, (request, response) => {
   //desestruturação do user
   const { user } = request;
 
-  return response.json(user.todos);
+  return response.send(user.todos)
 });
 
 //cadastro de todo
@@ -98,7 +98,7 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   
   user.todos.push(todo);  
 
-  return response.status(201).send();
+  return response.status(201).send(todo);
 });
 
 //alteração de dados do todo
