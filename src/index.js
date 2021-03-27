@@ -113,7 +113,7 @@ app.put('/todos/:id', checksExistsUserAccount, checksExistsTodo, (request, respo
   todo.title = title;
   todo.deadline = new Date(deadline);
 
-  return response.status(201).send();
+  return response.status(201).send(todo);
 });
 
 //conclusão de todo
