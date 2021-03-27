@@ -60,6 +60,7 @@ app.get('/todos', checksExistsUserAccount, (request, response) => {
   return response.json(user.todos);
 });
 
+//cadastro de todo
 app.post('/todos', checksExistsUserAccount, (request, response) => {
   const { title, deadline } = request.body;
 
@@ -78,6 +79,7 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   return response.status(201).send();
 });
 
+//alteração de dados do todo
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   const { username } = request.headers;
   const { title, deadline } = request.body;  
@@ -97,8 +99,24 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   return response.status(201).send();
 });
 
+//conclusão de todo
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { username } = request.headers; 
+
+  //busca do user
+  const user = users.find(user => user.username === username); 
+
+  //busca do todo
+  const todo = user.todos[request.params.id];
+
+  //verificacao de existencia do todo
+  if(!todo) return response.status(400).json({ error: "Todo not found!"}); 
+
+  if(todo.done === true) return response.status(400).json({ error: "This todo is already done!"}); 
+
+  todo.done = true;  
+
+  return response.status(201).send();
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
