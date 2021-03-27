@@ -43,7 +43,7 @@ function checksExistsTodo(request, response, next) {
   const todo = user.todos.find(todo => todo.id === request.params.id);
   
   //verificacao de existencia do todo
-  if(!todo) return response.status(400).json({ error: "Todo not found!"});  
+  if(!todo) return response.status(404).json({ error: "Todo not found!"});  
   
   //na utilização de mais de um middlware é necessário especificar o retorno da request
   request.todo = todo;  
@@ -128,7 +128,7 @@ app.patch('/todos/:id/done', checksExistsUserAccount, checksExistsTodo, (request
 
   todo.done = true;  
 
-  return response.status(201).send();
+  return response.status(201).send(todo);
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, checksExistsTodo, (request, response) => {
@@ -140,7 +140,7 @@ app.delete('/todos/:id', checksExistsUserAccount, checksExistsTodo, (request, re
 
   user.todos.splice(user.todos.indexOf(todo), 1);
 
-  return response.status(200).json(user.todos);
+  return response.status(204).send();
 });
 
 module.exports = app;
