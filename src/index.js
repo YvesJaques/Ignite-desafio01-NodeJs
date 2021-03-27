@@ -31,6 +31,28 @@ function checksExistsUserAccount(request, response, next) {
   return next();
 }
 
+//Middleware verifica existencia todo
+function checksExistsTodo(request, response, next) {
+  //desestruturação do username
+  const { username } = request.headers;
+
+  //busca do username
+  const user = users.find(user => user.username === username);   
+
+  //busca do todo
+  const todo = user.todos[request.params.id];
+
+  //verificacao de existencia do todo
+  if(!todo) return response.status(400).json({ error: "Todo not found!"});  
+  
+  //na utilização de mais de um middlware é necessário especificar o retorno da request
+  request.todo = todo;
+  //endereço do todo para evitar busca repetida em operacoes subsequentes
+  request.indexOfTodo = request.params.id; 
+
+  return next();
+}
+
 //cadastro de usuario
 app.post('/users', (request, response) => {
   const { username, name } = request.body;  
@@ -80,18 +102,13 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
 });
 
 //alteração de dados do todo
-app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
+app.put('/todos/:id', checksExistsUserAccount, checksExistsTodo, (request, response) => {
   const { username } = request.headers;
   const { title, deadline } = request.body;  
+  
+  const user = request.user;
 
-  //busca do user
-  const user = users.find(user => user.username === username); 
-
-  //busca do todo
-  const todo = user.todos[request.params.id];
-
-  //verificacao de existencia do todo
-  if(!todo) return response.status(400).json({ error: "Todo not found"}); 
+  const todo = request.todo;
 
   todo.title = title;
   todo.deadline = new Date(deadline);
@@ -100,17 +117,12 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
 });
 
 //conclusão de todo
-app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
+app.patch('/todos/:id/done', checksExistsUserAccount, checksExistsTodo, (request, response) => {
   const { username } = request.headers; 
-
-  //busca do user
-  const user = users.find(user => user.username === username); 
-
-  //busca do todo
-  const todo = user.todos[request.params.id];
-
-  //verificacao de existencia do todo
-  if(!todo) return response.status(400).json({ error: "Todo not found!"}); 
+  
+  const user = request.user;
+  
+  const todo = request.todo;
 
   if(todo.done === true) return response.status(400).json({ error: "This todo is already done!"}); 
 
@@ -119,19 +131,14 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
   return response.status(201).send();
 });
 
-app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
+app.delete('/todos/:id', checksExistsUserAccount, checksExistsTodo, (request, response) => {
   const { username } = request.headers;  
+  
+  const user = request.user;
 
-  //busca do user
-  const user = users.find(user => user.username === username); 
+  const todo = request.todo;
 
-  //busca do todo
-  const todo = user.todos[request.params.id];
-
-  //verificacao de existencia do todo
-  if(!todo) return response.status(400).json({ error: "Todo not found!"}); 
-
-  user.todos.splice(user.todos.indexOf(todo), 1);
+  user.todos.splice(request.indexOfTodo, 1);
 
   return response.status(200).json(user.todos);
 });
